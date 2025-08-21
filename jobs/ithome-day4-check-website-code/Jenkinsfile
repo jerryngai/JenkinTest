@@ -5,13 +5,17 @@ pipeline {
       steps{
         withCredentials([string(credentialsId: 'ithome-telegram-bot-token', variable: 'TOKEN')]){
           withCredentials([string(credentialsId: 'ithome-telegram-notification-group', variable: 'GROUP_ID')]){
-            sh  '''
-              command=$(curl -o /dev/null -s -w %{http_code} www.example.com)
-              if [ "${command}" != "200" ]; then
+            response_code = sh (
+                script: "curl -o /dev/null -s -w %{http_code} www.example.com",
+                returnStdout: true
+            ).toInteger()
+            sh '''
+                ......
+                if [ "${command}" != "200" ]; then
                 message="www.example.com response code != 200."
                 curl -X GET "https://api.telegram.org/bot${TOKEN}/sendMessage" \
-                  -d "chat_id=${GROUP_ID}&text=${message}"
-              fi                
+                    -d "chat_id=${GROUP_ID}&text=${message}"
+                fi
             '''
           }
         }
